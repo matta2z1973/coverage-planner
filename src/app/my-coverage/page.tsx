@@ -93,22 +93,32 @@ export default async function MyCoveragePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-12">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">My coverage</h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Blocks you&rsquo;ve signed up to cover.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-3 text-xs">
-          <span className="rounded bg-zinc-100 px-2 py-1 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-            Total: {enriched.length}
-          </span>
-          <span className="rounded bg-emerald-100 px-2 py-1 font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-            Upcoming: {upcoming.length}
-          </span>
-          <span className="rounded bg-zinc-100 px-2 py-1 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-            Past: {past.length}
-          </span>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">My coverage</h1>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Blocks you&rsquo;ve signed up to cover.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3 text-xs">
+            <span className="rounded bg-zinc-100 px-2 py-1 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+              Total: {enriched.length}
+            </span>
+            <span className="rounded bg-emerald-100 px-2 py-1 font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+              Upcoming: {upcoming.length}
+            </span>
+            <span className="rounded bg-zinc-100 px-2 py-1 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+              Past: {past.length}
+            </span>
+          </div>
         </div>
+        {enriched.length > 0 ? (
+          <Link
+            href="/my-coverage/export"
+            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+          >
+            Download CSV
+          </Link>
+        ) : null}
       </header>
 
       {enriched.length === 0 ? (

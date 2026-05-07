@@ -140,6 +140,7 @@ export const coverageRequests = pgTable(
       .references(() => profiles.id)
       .notNull(),
     absentTeacherName: text("absent_teacher_name").notNull(),
+    absentTeacherEmail: text("absent_teacher_email"),
     notes: text("notes"),
     curriculumText: text("curriculum_text"),
     curriculumUrl: text("curriculum_url"),
@@ -147,7 +148,10 @@ export const coverageRequests = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (t) => [index("coverage_requests_created_by_idx").on(t.createdBy)],
+  (t) => [
+    index("coverage_requests_created_by_idx").on(t.createdBy),
+    index("coverage_requests_absent_email_idx").on(t.absentTeacherEmail),
+  ],
 );
 
 // Files are attached at the slot level (per-block) starting 2026-05-06.

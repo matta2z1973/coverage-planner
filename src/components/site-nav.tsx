@@ -40,7 +40,7 @@ export default async function SiteNav() {
             href="/my-requests"
             className="text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
           >
-            My requests
+            My absences
           </Link>
           <Link
             href="/my-coverage"

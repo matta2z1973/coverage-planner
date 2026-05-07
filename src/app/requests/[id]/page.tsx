@@ -19,6 +19,15 @@ import {
   ReleaseButton,
 } from "@/components/slot-claim-button";
 import { SlotEditor } from "@/components/slot-editor";
+import {
+  CancelSlotButton,
+  CancelRequestButton,
+} from "@/components/slot-cancel-buttons";
+import {
+  EditScheduleToggle,
+  AddSlotForm,
+  type CohortOption,
+} from "@/components/slot-schedule-form";
 
 const DAY_TYPE_LABEL: Record<string, string> = {
   green: "Green",
@@ -104,19 +113,33 @@ export default async function RequestDetailPage({
     filesBySlot.set(key, arr);
   }
 
-  const slotCohorts = await db
+  const allCohorts = await db
     .select({
       id: cohorts.id,
+      code: cohorts.code,
       label: cohorts.label,
+      divisionId: cohorts.divisionId,
+      divisionCode: divisions.code,
       divisionLabel: divisions.label,
+      sortOrder: cohorts.sortOrder,
     })
     .from(cohorts)
-    .leftJoin(divisions, eq(divisions.id, cohorts.divisionId));
-  const cohortMap = new Map(slotCohorts.map((c) => [c.id, c]));
+    .leftJoin(divisions, eq(divisions.id, cohorts.divisionId))
+    .orderBy(asc(cohorts.sortOrder));
+  const cohortMap = new Map(
+    allCohorts.map((c) => [c.id, { label: c.label, divisionLabel: c.divisionLabel }]),
+  );
+  const cohortOptions: CohortOption[] = allCohorts.map((c) => ({
+    id: c.id,
+    code: c.code,
+    label: c.label,
+    divisionCode: (c.divisionCode ?? "US") as "US" | "MS",
+    divisionLabel: c.divisionLabel ?? "",
+  }));
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-12">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
             Coverage for {request.absentTeacherName}
@@ -126,12 +149,15 @@ export default async function RequestDetailPage({
             {format(request.createdAt, "MMM d, yyyy")}
           </p>
         </div>
-        <Link
-          href="/"
-          className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
-        >
-          ← Back
-        </Link>
+        <div className="flex items-center gap-3">
+          {canEdit ? <CancelRequestButton requestId={request.id} /> : null}
+          <Link
+            href="/"
+            className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
+          >
+            ← Back
+          </Link>
+        </div>
       </header>
 
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -167,7 +193,7 @@ export default async function RequestDetailPage({
                 <span className="text-zinc-500">
                   {s.startTime.slice(0, 5)}&ndash;{s.endTime.slice(0, 5)}
                 </span>
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex flex-wrap items-center gap-2">
                   {s.status === "open" ? (
                     <ClaimButton slotId={s.id} />
                   ) : s.status === "claimed" ? (
@@ -191,8 +217,28 @@ export default async function RequestDetailPage({
                       {s.status}
                     </span>
                   )}
+                  {s.status !== "cancelled" &&
+                  (canEdit || s.claimedByUserId === user.id) ? (
+                    <CancelSlotButton slotId={s.id} />
+                  ) : null}
                 </div>
               </div>
+
+              {canEdit && s.status !== "cancelled" ? (
+                <div className="mt-2">
+                  <EditScheduleToggle
+                    slotId={s.id}
+                    cohorts={cohortOptions}
+                    initialCohortId={s.cohortId}
+                    initialDate={s.date}
+                    initialDayType={s.dayType as "green" | "gold" | "a_day" | "b_day" | "c_day"}
+                    initialDayNumber={s.dayNumber}
+                    initialBlockLabel={s.blockLabel}
+                    initialStartTime={s.startTime}
+                    initialEndTime={s.endTime}
+                  />
+                </div>
+              ) : null}
 
               {hasDetails ? (
                 <div className="mt-3 flex flex-col gap-2 border-t border-zinc-200 pt-3 text-sm dark:border-zinc-800">
@@ -274,6 +320,22 @@ export default async function RequestDetailPage({
           );
         })}
       </ul>
+
+      {canEdit ? (
+        <section className="rounded-lg border border-dashed border-zinc-300 p-4 dark:border-zinc-700">
+          <h2 className="text-sm font-medium">Add a block to this request</h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            Use this if you forgot a block or need to add another date.
+          </p>
+          <div className="mt-3">
+            <AddSlotForm
+              requestId={request.id}
+              cohorts={cohortOptions}
+              defaultCohortId={slots[0]?.cohortId ?? cohortOptions[0]?.id}
+            />
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

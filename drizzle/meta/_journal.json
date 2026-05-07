@@ -29,6 +29,13 @@
       "when": 1778095132566,
       "tag": "0003_nappy_prima",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778174872039,
+      "tag": "0004_smart_venom",
+      "breakpoints": true
     }
   ]
 }

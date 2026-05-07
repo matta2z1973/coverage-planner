@@ -26,6 +26,11 @@ export type RequestFormProps = {
     isCoverable: boolean;
   }[];
   seed: { date: string; dayNumber: number | null } | null;
+  currentUser: {
+    role: "faculty" | "admin";
+    fullName: string | null;
+    email: string;
+  };
 };
 
 type UploadedFile = { storagePath: string; fileName: string };
@@ -73,7 +78,9 @@ export default function RequestForm({
   cohorts,
   blocks,
   seed,
+  currentUser,
 }: RequestFormProps) {
+  const isAdmin = currentUser.role === "admin";
   const cohortById = useMemo(
     () => new Map(cohorts.map((c) => [c.id, c])),
     [cohorts],
@@ -84,7 +91,12 @@ export default function RequestForm({
   );
 
   const today = format(new Date(), "yyyy-MM-dd");
-  const [absentTeacher, setAbsentTeacher] = useState("");
+  const [absentTeacher, setAbsentTeacher] = useState(
+    isAdmin ? "" : (currentUser.fullName ?? currentUser.email),
+  );
+  const [absentEmail, setAbsentEmail] = useState(
+    isAdmin ? "" : currentUser.email,
+  );
   const [selectedCohortIds, setSelectedCohortIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
@@ -317,18 +329,22 @@ export default function RequestForm({
     }
     return JSON.stringify({
       absentTeacherName: absentTeacher.trim(),
+      absentTeacherEmail: absentEmail.trim() || null,
       slots,
     });
-  }, [absentTeacher, selectedCohortIds, rowsByCohort, blocksFor, entries]);
+  }, [absentTeacher, absentEmail, selectedCohortIds, rowsByCohort, blocksFor, entries]);
 
   const totalSelected = Object.values(entries).filter((e) => e.selected).length;
   const anyUploading = Object.values(entries).some((e) => e.uploading > 0);
   const missingTitleCount = Object.values(entries).filter(
     (e) => e.selected && e.courseTitle.trim().length === 0,
   ).length;
+  const adminMissingFields =
+    isAdmin && (absentTeacher.trim().length === 0 || absentEmail.trim().length === 0);
   const canSubmit =
     !pending &&
     absentTeacher.trim().length > 0 &&
+    !adminMissingFields &&
     totalSelected > 0 &&
     missingTitleCount === 0 &&
     !anyUploading;
@@ -354,15 +370,52 @@ export default function RequestForm({
       <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
         <h2 className="text-base font-medium">Who&rsquo;s out?</h2>
         <div className="mt-3 grid grid-cols-1 gap-3">
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium">Absent teacher</span>
-            <input
-              value={absentTeacher}
-              onChange={(e) => setAbsentTeacher(e.target.value)}
-              placeholder="e.g. Mr. Smith"
-              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-            />
-          </label>
+          {isAdmin ? (
+            <>
+              <p className="text-xs text-zinc-500">
+                Posting on behalf of someone — fill in their name and school
+                email so they get linked to this request.
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="font-medium">
+                    Absent teacher name <span className="text-red-600">*</span>
+                  </span>
+                  <input
+                    required
+                    value={absentTeacher}
+                    onChange={(e) => setAbsentTeacher(e.target.value)}
+                    placeholder="e.g. Mr. Smith"
+                    className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="font-medium">
+                    Absent teacher email <span className="text-red-600">*</span>
+                  </span>
+                  <input
+                    required
+                    type="email"
+                    value={absentEmail}
+                    onChange={(e) => setAbsentEmail(e.target.value)}
+                    placeholder="msmith@greenhill.org"
+                    className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                  />
+                </label>
+              </div>
+            </>
+          ) : (
+            <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+              Posting as: <strong>{currentUser.fullName ?? currentUser.email}</strong>
+              {currentUser.fullName ? (
+                <span className="ml-2 text-zinc-500">({currentUser.email})</span>
+              ) : null}
+              <p className="mt-1 text-xs text-zinc-500">
+                Faculty can only post requests for themselves. Ask an admin to
+                post on someone else&rsquo;s behalf.
+              </p>
+            </div>
+          )}
 
           <fieldset className="flex flex-col gap-2 text-sm">
             <legend className="font-medium">Cohorts taught</legend>

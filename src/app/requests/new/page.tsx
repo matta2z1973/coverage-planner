@@ -10,7 +10,7 @@ import {
 import RequestForm, { type RequestFormProps } from "./request-form";
 
 export default async function NewRequestPage() {
-  await requireUser();
+  const user = await requireUser();
 
   const [allDivisions, allCohorts, allBlocks] = await Promise.all([
     db.select().from(divisions).orderBy(divisions.code),
@@ -63,6 +63,11 @@ export default async function NewRequestPage() {
     seed: lastUsSlot
       ? { date: lastUsSlot.date, dayNumber: lastUsSlot.dayNumber }
       : null,
+    currentUser: {
+      role: user.role,
+      fullName: user.fullName,
+      email: user.email,
+    },
   };
 
   return <RequestForm {...props} />;

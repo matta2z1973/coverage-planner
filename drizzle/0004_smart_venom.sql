@@ -1,0 +1,2 @@
+ALTER TABLE "coverage_requests" ADD COLUMN "absent_teacher_email" text;--> statement-breakpoint
+CREATE INDEX "coverage_requests_absent_email_idx" ON "coverage_requests" USING btree ("absent_teacher_email");

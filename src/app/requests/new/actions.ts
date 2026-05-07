@@ -37,7 +37,11 @@ const slotInput = z.object({
 });
 
 const requestInput = z.object({
-  absentTeacherName: z.string().min(1).max(120),
+  absentTeacherName: z.string().trim().min(1).max(120),
+  absentTeacherEmail: z
+    .union([z.string().email().max(200), z.literal("")])
+    .optional()
+    .nullable(),
   slots: z.array(slotInput).min(1, "Pick at least one block to cover"),
 });
 
@@ -76,7 +80,14 @@ export async function createRequest(
     };
   }
 
-  const { absentTeacherName, slots } = result.data;
+  const { absentTeacherName, absentTeacherEmail: rawEmail, slots } = result.data;
+
+  // Faculty can only post for themselves: ignore whatever they send and snap
+  // both name and email to the current user. Admins can target anyone.
+  const absentTeacherEmail =
+    user.role === "admin" ? (rawEmail || null) : user.email;
+  const finalName =
+    user.role === "admin" ? absentTeacherName : (user.fullName ?? user.email);
 
   // Validate every referenced cohort exists.
   const referencedCohorts = [...new Set(slots.map((s) => s.cohortId))];
@@ -104,7 +115,8 @@ export async function createRequest(
         .insert(coverageRequests)
         .values({
           createdBy: user.id,
-          absentTeacherName,
+          absentTeacherName: finalName,
+          absentTeacherEmail,
         })
         .returning({ id: coverageRequests.id });
       requestId = created.id;
