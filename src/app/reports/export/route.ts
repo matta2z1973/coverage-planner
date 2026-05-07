@@ -29,8 +29,8 @@ const COLUMNS = [
   "Claimed At",
 ];
 
-function csvEscape(v: string | null | undefined): string {
-  if (v === null || v === undefined) return "";
+function csvEscape(v: string | number | null | undefined): string {
+  if (v === null || v === undefined || v === "") return "";
   const s = String(v);
   if (s.includes(",") || s.includes('"') || s.includes("\n")) {
     return `"${s.replace(/"/g, '""')}"`;
