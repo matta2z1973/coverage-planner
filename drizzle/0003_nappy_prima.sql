@@ -1,0 +1,1 @@
+ALTER TABLE "coverage_slots" ADD COLUMN "course_title" text;

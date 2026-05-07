@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778083896597,
+      "tag": "0000_lyrical_captain_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778090878330,
+      "tag": "0001_stormy_sumo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778094248346,
+      "tag": "0002_futuristic_iceman",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778095132566,
+      "tag": "0003_nappy_prima",
+      "breakpoints": true
+    }
+  ]
+}
