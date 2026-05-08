@@ -95,9 +95,3 @@ export async function verifyOtp(
 
   redirect("/");
 }
-
-// Back-compat name in case any old caller imports it; just delegates to requestOtp.
-export const sendMagicLink = requestOtp;
-export type { LoginState as LoginStateAlias };
-
-void initial;
