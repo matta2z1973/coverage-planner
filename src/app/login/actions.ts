@@ -79,10 +79,14 @@ export async function verifyOtp(
   }
 
   const supabase = await createSupabaseServerClient();
+  // signInWithOtp generates a magiclink-type token (Supabase default for the
+  // email channel). Don't use type: "email" here — that's for a different
+  // PKCE-based confirmation flow and produces "Token has expired or is
+  // invalid" against this token.
   const { error } = await supabase.auth.verifyOtp({
     email: parsed.data.email,
     token: parsed.data.code,
-    type: "email",
+    type: "magiclink",
   });
 
   if (error) {
