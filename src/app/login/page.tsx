@@ -37,9 +37,7 @@ export default function LoginPage() {
             Enter your sign-in code
           </h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            We sent a 6-digit code to <strong>{email}</strong>. Type it below.
-            (You can also click the link in the email if your inbox supports
-            it.)
+            We sent a sign-in code to <strong>{email}</strong>. Type it below.
           </p>
         </div>
 
@@ -52,12 +50,12 @@ export default function LoginPage() {
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              pattern="\d{6}"
-              maxLength={6}
+              pattern="\d{4,10}"
+              maxLength={10}
               required
               autoFocus
-              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[0.4em] focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900"
-              placeholder="123456"
+              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-center font-mono text-lg tracking-[0.3em] focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900"
+              placeholder="12345678"
             />
           </label>
 
@@ -92,8 +90,7 @@ export default function LoginPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          We&rsquo;ll email you a 6-digit code (and a link, for inboxes that
-          allow it).
+          We&rsquo;ll email you a numeric code to sign in.
         </p>
       </div>
 

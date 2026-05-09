@@ -58,7 +58,12 @@ export async function requestOtp(
 
 const verifySchema = z.object({
   email: z.string().email(),
-  code: z.string().regex(/^\d{6}$/, "Enter the 6-digit code"),
+  // Supabase OTP length is configurable (4-10). Allow whatever length the
+  // project is set to.
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{4,10}$/, "Enter the numeric code from your email"),
 });
 
 export async function verifyOtp(
